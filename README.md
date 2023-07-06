@@ -1,2 +1,2 @@
 # BoardProject
-Java + Spring / 게시판 프로젝트 만들기
+심심해서 만드는 게시판 프로젝트
