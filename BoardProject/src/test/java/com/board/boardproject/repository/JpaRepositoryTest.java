@@ -28,16 +28,62 @@ class JpaRepositoryTest {
         this.articleCommentRepository = articleCommentRepository;
     }
 
-    @DisplayName("Select TEST")
+    @DisplayName("Select Test")
     @Test
     void givenTestData_whenSelecting_thenWorksFine(){
         //Given
 
         //When
         List<Article> articles = articleRepository.findAll();
+
         //Then
         assertThat(articles)
                 .isNotNull()
                 .hasSize(200);
+    }
+
+    @DisplayName("Insert Test")
+    @Test
+    void givenTestData_whenInserting_thenWorksFine(){
+        //Given
+        long previousCount = articleRepository.count();
+
+        //When
+        Article savedArticle = articleRepository.save(Article.of("New article", "New Content", "#Spring"));
+
+        //Then
+        assertThat(articleRepository.count()).isEqualTo(previousCount + 1);
+    }
+
+    @DisplayName("Update Test")
+    @Test
+    void givenTestData_whenUpdating_thenWorksFine(){
+        //Given
+        Article article = articleRepository.findById(1L).orElseThrow();
+        String updatedHashtag = "#Springboot";
+        article.setHashtag(updatedHashtag);
+
+        //When
+        Article savedArticle = articleRepository.saveAndFlush(article);
+
+        //Then
+        assertThat(savedArticle).hasFieldOrPropertyWithValue("hashtag", updatedHashtag);
+    }
+
+    @DisplayName("Delete Test")
+    @Test
+    void givenTestData_whenDeleting_thenWorksFine(){
+        //Given
+        Article article = articleRepository.findById(1L).orElseThrow();
+        long previousArticleCount = articleRepository.count();
+        long previousArticleCommentCount = articleCommentRepository.count();
+        int deletedCommentsSize = article.getArticleComments().size();
+
+        //When
+        articleRepository.delete(article);
+
+        //Then
+        assertThat(articleRepository.count()).isEqualTo(previousArticleCount - 1);
+        assertThat(articleCommentRepository.count()).isEqualTo(previousArticleCommentCount - deletedCommentsSize);
     }
 }

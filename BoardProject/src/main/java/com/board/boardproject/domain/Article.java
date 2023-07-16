@@ -33,7 +33,7 @@ public class Article {
     private Long id;
 
     @Setter @Column(nullable = false) private String title; //제목
-    @Setter @Column(nullable = false) private String content; //내용
+    @Setter @Column(nullable = false, length = 500) private String content; //내용
 
     @Setter private String hashtag; //해시태그
 
