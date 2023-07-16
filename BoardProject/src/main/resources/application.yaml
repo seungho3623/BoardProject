@@ -1,6 +1,9 @@
 debug: false
 management.endpoints.web.exposure.include: "*"
 
+server:
+  port: 8080
+
 logging:
   level:
     com.board.boardproject: debug
@@ -13,6 +16,7 @@ spring:
     username: root
     password: root1234!!
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     defer-datasource-initialization: true
     hibernate.ddl-auto: create
@@ -21,7 +25,6 @@ spring:
       hibernate.format_sql: true
       hibernate.default_batch_fetch_size: 100
   sql.init.mode: always
-  h2.console.enabled: false
 
 ---
 
