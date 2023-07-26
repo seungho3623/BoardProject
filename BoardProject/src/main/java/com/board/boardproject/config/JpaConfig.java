@@ -10,7 +10,6 @@ import java.util.Optional;
 @EnableJpaAuditing
 @Configuration
 public class JpaConfig {
-
     @Bean
     public AuditorAware<String> auditorAware(){
         return () -> Optional.of("seungho"); //TODO: 스프링 시큐리티 인증 기능 추가할 때 수정
