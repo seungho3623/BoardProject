@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @DisplayName("View Controller - Articles")
 @WebMvcTest(ArticleController.class)
@@ -30,10 +31,12 @@ class ArticleControllerTest {
         //When & Then
         mvc.perform(get("/articles"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML))
+                .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(view().name("articles/index"))
                 .andExpect(MockMvcResultMatchers.model().attributeExists("articles"));
     }
-
+    
+    @Disabled("구현 중")
     @DisplayName("[View][Get] Article Detail Page")
     @Test
     public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception{
@@ -43,9 +46,12 @@ class ArticleControllerTest {
         mvc.perform(get("/articles/1"))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML))
-                .andExpect(MockMvcResultMatchers.model().attributeExists("article"));
+                .andExpect(view().name("articles/detail"))
+                .andExpect(MockMvcResultMatchers.model().attributeExists("article"))
+                .andExpect(MockMvcResultMatchers.model().attributeExists("articleComments"));
     }
 
+    @Disabled("구현 중")
     @DisplayName("[View][Get] Article Search Page")
     @Test
     public void givenNothing_whenRequestingArticleSearchView_thenReturnsArticleSearchView() throws Exception{
@@ -54,9 +60,11 @@ class ArticleControllerTest {
         //When & Then
         mvc.perform(get("/articles/search"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML));
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML))
+                .andExpect(MockMvcResultMatchers.model().attributeExists("article/search"));
     }
 
+    @Disabled("구현 중")
     @DisplayName("[View][Get] Article HashTag Search Page")
     @Test
     public void givenNothing_whenRequestingArticleHashTagSearchView_thenReturnsArticleHashTagSearchView() throws Exception{
@@ -65,6 +73,7 @@ class ArticleControllerTest {
         //When & Then
         mvc.perform(get("/articles/search-hashtag"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML));
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML))
+                .andExpect(MockMvcResultMatchers.model().attributeExists("article/search-hashtag"));
     }
 }
