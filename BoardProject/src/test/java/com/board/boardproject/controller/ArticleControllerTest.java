@@ -38,7 +38,7 @@ class ArticleControllerTest {
                 .andExpect(view().name("articles/index"))
                 .andExpect(MockMvcResultMatchers.model().attributeExists("articles"));
     }
-    
+
     @DisplayName("[View][Get] Article Detail Page")
     @Test
     public void givenNothing_whenRequestingArticleView_thenReturnsArticleView() throws Exception{
