@@ -2,12 +2,15 @@ package com.board.boardproject.repository;
 
 import com.board.boardproject.config.JpaConfig;
 import com.board.boardproject.domain.Article;
+import com.board.boardproject.domain.UserAccount;
+import com.board.boardproject.dto.UserAccountDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -46,10 +49,11 @@ class JpaRepositoryTest {
     @Test
     void givenTestData_whenInserting_thenWorksFine(){
         //Given
+        UserAccountDto userAccountDto = new UserAccountDto(null, null, null, null, null, LocalDateTime.now(), null, LocalDateTime.now(), null);
         long previousCount = articleRepository.count();
 
         //When
-        Article savedArticle = articleRepository.save(Article.of("New article", "New Content", "#Spring"));
+        Article savedArticle = articleRepository.save(Article.of(userAccountDto.toEntity(), "New article", "New Content", "#Spring"));
 
         //Then
         assertThat(articleRepository.count()).isEqualTo(previousCount + 1);
