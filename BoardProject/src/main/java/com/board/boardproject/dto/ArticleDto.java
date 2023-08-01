@@ -22,7 +22,7 @@ public record ArticleDto(
         return new ArticleDto(id, userAccountDto, title, content, hashtag, createdAt, createdBy, modifiedAt, modifiedBy);
     }
 
-    public static ArticleDto from(Article entity){
+    public static ArticleDto from(Article entity) {
         return new ArticleDto(
                 entity.getId(),
                 UserAccountDto.from(entity.getUserAccount()),
@@ -33,6 +33,15 @@ public record ArticleDto(
                 entity.getCreatedBy(),
                 entity.getModifiedAt(),
                 entity.getModifiedBy()
+        );
+    }
+
+    public Article toEntity() {
+        return Article.of(
+                userAccountDto.toEntity(),
+                title,
+                content,
+                hashtag
         );
     }
 }

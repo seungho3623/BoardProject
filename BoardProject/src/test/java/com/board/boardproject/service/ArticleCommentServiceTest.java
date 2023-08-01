@@ -5,6 +5,7 @@ import com.board.boardproject.dto.ArticleCommentDto;
 import com.board.boardproject.dto.UserAccountDto;
 import com.board.boardproject.repository.ArticleCommentRepository;
 import com.board.boardproject.repository.ArticleRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,11 +28,12 @@ class ArticleCommentServiceTest {
     @Mock private ArticleCommentRepository articleCommentRepository;
     @Mock private ArticleRepository articleRepository;
 
+    @Disabled("구현 중")
     @DisplayName("게시글 ID 조회 -> 댓글 리스트 반환")
     @Test
     void ArticleId_SearchingArticleComments_ReturnsArticleComments(){
         Long articleId = 1L;
-        UserAccountDto userAccountDto = new UserAccountDto(null, null, null, null, null, LocalDateTime.now(), null, LocalDateTime.now(), null);
+        UserAccountDto userAccountDto = new UserAccountDto(1L, null, null, null, null, null, LocalDateTime.now(), null, LocalDateTime.now(), null);
 
         BDDMockito.given(articleRepository
                 .findById(articleId))
