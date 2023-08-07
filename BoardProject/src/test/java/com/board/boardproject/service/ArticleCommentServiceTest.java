@@ -7,11 +7,10 @@ import com.board.boardproject.dto.ArticleCommentDto;
 import com.board.boardproject.dto.UserAccountDto;
 import com.board.boardproject.repository.ArticleCommentRepository;
 import com.board.boardproject.repository.ArticleRepository;
-import org.junit.jupiter.api.Disabled;
+import com.board.boardproject.repository.UserAccountRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,6 +30,7 @@ class ArticleCommentServiceTest {
     @InjectMocks private ArticleCommentService articleCommentService;
     @Mock private ArticleCommentRepository articleCommentRepository;
     @Mock private ArticleRepository articleRepository;
+    @Mock private UserAccountRepository userAccountRepository;
 
     @DisplayName("게시글 ID로 조회하면, 해당하는 댓글 리스트를 반환한다.")
     @Test
@@ -42,7 +41,7 @@ class ArticleCommentServiceTest {
         given(articleCommentRepository.findByArticle_Id(articleId)).willReturn(List.of(expected));
 
         // When
-        List<ArticleCommentDto> actual = articleCommentService.searchArticleComment(articleId);
+        List<ArticleCommentDto> actual = articleCommentService.searchArticleComments(articleId);
 
         // Then
         assertThat(actual)
@@ -56,6 +55,7 @@ class ArticleCommentServiceTest {
         // Given
         ArticleCommentDto dto = createArticleCommentDto("댓글");
         given(articleRepository.getReferenceById(dto.articleId())).willReturn(createArticle());
+        given(userAccountRepository.getReferenceById(dto.userAccountDto().userId())).willReturn(createUserAccount());
         given(articleCommentRepository.save(any(ArticleComment.class))).willReturn(null);
 
         // When
@@ -63,6 +63,7 @@ class ArticleCommentServiceTest {
 
         // Then
         then(articleRepository).should().getReferenceById(dto.articleId());
+        then(userAccountRepository).should().getReferenceById(dto.userAccountDto().userId());
         then(articleCommentRepository).should().save(any(ArticleComment.class));
     }
     @DisplayName("댓글 저장을 시도했는데 맞는 게시글이 없으면, 경고 로그를 찍고 아무것도 안 한다.")
@@ -77,6 +78,7 @@ class ArticleCommentServiceTest {
 
         // Then
         then(articleRepository).should().getReferenceById(dto.articleId());
+        then(userAccountRepository).shouldHaveNoInteractions();
         then(articleCommentRepository).shouldHaveNoInteractions();
     }
     @DisplayName("댓글 정보를 입력하면, 댓글을 수정한다.")
