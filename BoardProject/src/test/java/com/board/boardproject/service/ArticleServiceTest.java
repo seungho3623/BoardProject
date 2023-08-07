@@ -70,6 +70,36 @@ class ArticleServiceTest {
         then(articleRepository).should().findByTitleContaining(searchKeyword, pageable);
     }
 
+    @DisplayName("검색어 없이 게시글을 해시태그 검색하면, 빈 페이지를 반환한다.")
+    @Test
+    void givenNoSearchParameters_whenSearchingArticlesViaHashtag_thenReturnsEmptyPage() {
+        // Given
+        Pageable pageable = Pageable.ofSize(20);
+
+        // When
+        Page<ArticleDto> articles = articleService.searchArticlesViaHashtag(null, pageable);
+
+        // Then
+        assertThat(articles).isEqualTo(Page.empty(pageable));
+        then(articleRepository).shouldHaveNoInteractions();
+    }
+
+    @DisplayName("게시글을 해시태그 검색하면, 게시글 페이지를 반환한다.")
+    @Test
+    void givenHashtag_whenSearchingArticlesViaHashtag_thenReturnsArticlesPage() {
+        // Given
+        String hashtag = "#java";
+        Pageable pageable = Pageable.ofSize(20);
+        given(articleRepository.findByHashtag(hashtag, pageable)).willReturn(Page.empty(pageable));
+
+        // When
+        Page<ArticleDto> articles = articleService.searchArticlesViaHashtag(hashtag, pageable);
+
+        // Then
+        assertThat(articles).isEqualTo(Page.empty(pageable));
+        then(articleRepository).should().findByHashtag(hashtag, pageable);
+    }
+
     @DisplayName("게시글을 조회하면, 게시글을 반환한다.")
     @Test
     void givenArticleId_whenSearchingArticle_thenReturnsArticle() {
@@ -183,6 +213,21 @@ class ArticleServiceTest {
         then(articleRepository).should().count();
     }
 
+    @DisplayName("해시태그를 조회하면, 유니크 해시태그 리스트를 반환한다")
+    @Test
+    void givenNothing_whenCalling_thenReturnsHashtags() {
+        // Given
+        List<String> expectedHashtags = List.of("#java", "#spring", "#boot");
+        given(articleRepository.findAllDistinctHashtags()).willReturn(expectedHashtags);
+
+        // When
+        List<String> actualHashtags = articleService.getHashtags();
+
+        // Then
+        assertThat(actualHashtags).isEqualTo(expectedHashtags);
+        then(articleRepository).should().findAllDistinctHashtags();
+    }
+
     private UserAccount createUserAccount() {
         return createUserAccount("ssh");
     }
@@ -232,7 +277,6 @@ class ArticleServiceTest {
 
     private UserAccountDto createUserAccountDto() {
         return UserAccountDto.of(
-                1L,
                 "ssh",
                 "password",
                 "seungho3623@naver.com",

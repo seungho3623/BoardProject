@@ -4,6 +4,7 @@ import com.board.boardproject.domain.ArticleComment;
 import com.board.boardproject.dto.ArticleCommentDto;
 import com.board.boardproject.repository.ArticleCommentRepository;
 import com.board.boardproject.repository.ArticleRepository;
+import com.board.boardproject.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class ArticleCommentService {
 
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
+    private final UserAccountRepository userAccountRepository;
 
     @Transactional(readOnly = true)
     public List<ArticleCommentDto> searchArticleComment(Long articleId) {

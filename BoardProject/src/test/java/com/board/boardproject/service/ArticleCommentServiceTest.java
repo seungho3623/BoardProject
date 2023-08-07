@@ -1,6 +1,8 @@
 package com.board.boardproject.service;
 
 import com.board.boardproject.domain.Article;
+import com.board.boardproject.domain.ArticleComment;
+import com.board.boardproject.domain.UserAccount;
 import com.board.boardproject.dto.ArticleCommentDto;
 import com.board.boardproject.dto.UserAccountDto;
 import com.board.boardproject.repository.ArticleCommentRepository;
@@ -14,11 +16,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.*;
 
 @DisplayName("비즈니스 로직 - 댓글")
 @ExtendWith(MockitoExtension.class)
@@ -28,20 +33,147 @@ class ArticleCommentServiceTest {
     @Mock private ArticleCommentRepository articleCommentRepository;
     @Mock private ArticleRepository articleRepository;
 
-    @Disabled("구현 중")
-    @DisplayName("게시글 ID 조회 -> 댓글 리스트 반환")
+    @DisplayName("게시글 ID로 조회하면, 해당하는 댓글 리스트를 반환한다.")
     @Test
-    void ArticleId_SearchingArticleComments_ReturnsArticleComments(){
+    void givenArticleId_whenSearchingArticleComments_thenReturnsArticleComments() {
+        // Given
         Long articleId = 1L;
-        UserAccountDto userAccountDto = new UserAccountDto(1L, null, null, null, null, null, LocalDateTime.now(), null, LocalDateTime.now(), null);
+        ArticleComment expected = createArticleComment("content");
+        given(articleCommentRepository.findByArticle_Id(articleId)).willReturn(List.of(expected));
 
-        BDDMockito.given(articleRepository
-                .findById(articleId))
-                .willReturn(Optional.of(Article.of(userAccountDto.toEntity(), "title","content","hashtag")));
+        // When
+        List<ArticleCommentDto> actual = articleCommentService.searchArticleComment(articleId);
 
-        List<ArticleCommentDto> articleComments = articleCommentService.searchArticleComment(articleId);
-
-        assertThat(articleComments).isNotNull();
-        BDDMockito.then(articleRepository).should().findById(articleId);
+        // Then
+        assertThat(actual)
+                .hasSize(1)
+                .first().hasFieldOrPropertyWithValue("content", expected.getContent());
+        then(articleCommentRepository).should().findByArticle_Id(articleId);
     }
+    @DisplayName("댓글 정보를 입력하면, 댓글을 저장한다.")
+    @Test
+    void givenArticleCommentInfo_whenSavingArticleComment_thenSavesArticleComment() {
+        // Given
+        ArticleCommentDto dto = createArticleCommentDto("댓글");
+        given(articleRepository.getReferenceById(dto.articleId())).willReturn(createArticle());
+        given(articleCommentRepository.save(any(ArticleComment.class))).willReturn(null);
+
+        // When
+        articleCommentService.saveArticleComment(dto);
+
+        // Then
+        then(articleRepository).should().getReferenceById(dto.articleId());
+        then(articleCommentRepository).should().save(any(ArticleComment.class));
+    }
+    @DisplayName("댓글 저장을 시도했는데 맞는 게시글이 없으면, 경고 로그를 찍고 아무것도 안 한다.")
+    @Test
+    void givenNonexistentArticle_whenSavingArticleComment_thenLogsSituationAndDoesNothing() {
+        // Given
+        ArticleCommentDto dto = createArticleCommentDto("댓글");
+        given(articleRepository.getReferenceById(dto.articleId())).willThrow(EntityNotFoundException.class);
+
+        // When
+        articleCommentService.saveArticleComment(dto);
+
+        // Then
+        then(articleRepository).should().getReferenceById(dto.articleId());
+        then(articleCommentRepository).shouldHaveNoInteractions();
+    }
+    @DisplayName("댓글 정보를 입력하면, 댓글을 수정한다.")
+    @Test
+    void givenArticleCommentInfo_whenUpdatingArticleComment_thenUpdatesArticleComment() {
+        // Given
+        String oldContent = "content";
+        String updatedContent = "댓글";
+        ArticleComment articleComment = createArticleComment(oldContent);
+        ArticleCommentDto dto = createArticleCommentDto(updatedContent);
+        given(articleCommentRepository.getReferenceById(dto.id())).willReturn(articleComment);
+
+        // When
+        articleCommentService.updateArticleComment(dto);
+
+        // Then
+        assertThat(articleComment.getContent())
+                .isNotEqualTo(oldContent)
+                .isEqualTo(updatedContent);
+        then(articleCommentRepository).should().getReferenceById(dto.id());
+    }
+    @DisplayName("없는 댓글 정보를 수정하려고 하면, 경고 로그를 찍고 아무 것도 안 한다.")
+    @Test
+    void givenNonexistentArticleComment_whenUpdatingArticleComment_thenLogsWarningAndDoesNothing() {
+        // Given
+        ArticleCommentDto dto = createArticleCommentDto("댓글");
+        given(articleCommentRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
+
+        // When
+        articleCommentService.updateArticleComment(dto);
+
+        // Then
+        then(articleCommentRepository).should().getReferenceById(dto.id());
+    }
+    @DisplayName("댓글 ID를 입력하면, 댓글을 삭제한다.")
+    @Test
+    void givenArticleCommentId_whenDeletingArticleComment_thenDeletesArticleComment() {
+        // Given
+        Long articleCommentId = 1L;
+        willDoNothing().given(articleCommentRepository).deleteById(articleCommentId);
+
+        // When
+        articleCommentService.deleteArticleComment(articleCommentId);
+
+        // Then
+        then(articleCommentRepository).should().deleteById(articleCommentId);
+    }
+
+    private ArticleCommentDto createArticleCommentDto(String content) {
+        return ArticleCommentDto.of(
+                1L,
+                1L,
+                createUserAccountDto(),
+                content,
+                LocalDateTime.now(),
+                "ssh",
+                LocalDateTime.now(),
+                "ssh"
+        );
+    }
+
+    private UserAccountDto createUserAccountDto() {
+        return UserAccountDto.of(
+                "ssh",
+                "password",
+                "seungho3623@naver.com",
+                "Uno",
+                "This is memo",
+                LocalDateTime.now(),
+                "ssh",
+                LocalDateTime.now(),
+                "ssh"
+        );
+    }
+    private ArticleComment createArticleComment(String content) {
+        return ArticleComment.of(
+                Article.of(createUserAccount(), "title", "content", "hashtag"),
+                createUserAccount(),
+                content
+        );
+    }
+    private UserAccount createUserAccount() {
+        return UserAccount.of(
+                "ssh",
+                "password",
+                "seungho3623@naver.com",
+                "Uno",
+                null
+        );
+    }
+    private Article createArticle() {
+        return Article.of(
+                createUserAccount(),
+                "title",
+                "content",
+                "#java"
+        );
+    }
+
 }
