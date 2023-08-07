@@ -1,10 +1,12 @@
 package com.board.boardproject.service;
 
 import com.board.boardproject.domain.Article;
-import com.board.boardproject.domain.SearchType;
+import com.board.boardproject.domain.UserAccount;
+import com.board.boardproject.domain.constant.SearchType;
 import com.board.boardproject.dto.ArticleDto;
 import com.board.boardproject.dto.ArticleWithCommentsDto;
 import com.board.boardproject.repository.ArticleRepository;
+import com.board.boardproject.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,6 +24,7 @@ import java.util.List;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final UserAccountRepository userAccountRepository;
 
     @Transactional(readOnly = true)
     public Page<ArticleDto> searchArticles(SearchType searchType, String searchKeyword, Pageable pageable) {
@@ -53,12 +56,13 @@ public class ArticleService {
     }
 
     public void saveArticle(ArticleDto articleDto) {
-        articleRepository.save(articleDto.toEntity());
+        UserAccount userAccount = userAccountRepository.getReferenceById(articleDto.userAccountDto().userId());
+        articleRepository.save(articleDto.toEntity(userAccount));
     }
 
-    public void updateArticle(ArticleDto articleDto) {
+    public void updateArticle(Long articleId, ArticleDto articleDto) {
         try {
-            Article article = articleRepository.getReferenceById(articleDto.id());
+            Article article = articleRepository.getReferenceById(articleId);
 
             if (articleDto.title() != null) {
                 article.setTitle(articleDto.title());
