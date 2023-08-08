@@ -190,20 +190,22 @@ class ArticleServiceTest {
     @DisplayName("게시글의 수정 정보를 입력하면, 게시글을 수정한다.")
     @Test
     void givenModifiedArticleInfo_whenUpdatingArticle_thenUpdatesArticle() {
-        //Given
+        // Given
         Article article = createArticle();
-        ArticleDto articleDto = createArticleDto("title", "content", "java");
+        ArticleDto articleDto = createArticleDto("새 타이틀", "새 내용", "#springboot");
         given(articleRepository.getReferenceById(articleDto.id())).willReturn(article);
+        given(userAccountRepository.getReferenceById(articleDto.userAccountDto().userId())).willReturn(articleDto.userAccountDto().toEntity());
 
-        //When
+        // When
         articleService.updateArticle(articleDto.id(), articleDto);
 
-        //Then
+        // Then
         assertThat(article)
                 .hasFieldOrPropertyWithValue("title", articleDto.title())
-                .hasFieldOrPropertyWithValue("content", articleDto.content());
-
+                .hasFieldOrPropertyWithValue("content", articleDto.content())
+                .hasFieldOrPropertyWithValue("hashtag", articleDto.hashtag());
         then(articleRepository).should().getReferenceById(articleDto.id());
+        then(userAccountRepository).should().getReferenceById(articleDto.userAccountDto().userId());
     }
 
     @DisplayName("없는 게시글의 수정 정보를 입력하면, 경고 로그를 찍고 아무 것도 하지 않는다.")
@@ -225,13 +227,14 @@ class ArticleServiceTest {
     void givenArticleId_whenDeletingArticle_thenDeletesArticle() {
         // Given
         Long articleId = 1L;
-        willDoNothing().given(articleRepository).deleteById(articleId);
+        String userId = "ssh";
+        willDoNothing().given(articleRepository).deleteByIdAndUserAccount_UserId(articleId, userId);
 
         // When
-        articleService.deleteArticle(1L);
+        articleService.deleteArticle(1L, userId);
 
         // Then
-        then(articleRepository).should().deleteById(articleId);
+        then(articleRepository).should().deleteByIdAndUserAccount_UserId(articleId, userId);
     }
 
 

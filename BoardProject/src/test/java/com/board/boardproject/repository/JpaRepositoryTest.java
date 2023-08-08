@@ -100,11 +100,12 @@ class JpaRepositoryTest {
         assertThat(articleCommentRepository.count()).isEqualTo(previousArticleCommentCount - deletedCommentsSize);
     }
 
+
     @EnableJpaAuditing
     @TestConfiguration
-    static class TestJpaConfig {
+    public static class TestJpaConfig {
         @Bean
-        AuditorAware<String> auditorAware() {
+        public AuditorAware<String> auditorAware() {
             return () -> Optional.of("ssh");
         }
     }
