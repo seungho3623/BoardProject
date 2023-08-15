@@ -1,6 +1,6 @@
 # BoardProject
 
-#Spring Boot + MySQL 을 사용하여 만든 간단한 게시판 페이지
+# Spring Boot + MySQL 을 사용하여 만든 간단한 게시판 페이지
 
 ## 기술 세부 스택
 
